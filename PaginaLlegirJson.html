@@ -33,12 +33,17 @@
       box-shadow: 0 2px 5px rgba(0,0,0,0.1);
     }
 
-    #search {
-      display: block;
-      width: 90%;
-      max-width: 500px;
+    .filters {
+      max-width: 700px;
       margin: 20px auto;
-      padding: 12px;
+      padding: 0 10px;
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+
+    input, select {
+      padding: 10px;
       font-size: 1em;
       border: 1px solid #ccc;
       border-radius: 8px;
@@ -46,7 +51,7 @@
     }
 
     #flights {
-      max-width: 600px;
+      max-width: 700px;
       margin: 0 auto 40px auto;
       padding: 0 10px;
     }
@@ -70,17 +75,6 @@
       margin: 6px 0;
       font-size: 1em;
     }
-
-    @media (max-width: 600px) {
-      .flight {
-        font-size: 1em;
-        padding: 14px;
-      }
-
-      #search {
-        font-size: 1em;
-      }
-    }
   </style>
 </head>
 <body>
@@ -89,11 +83,15 @@
     Vueling Flight Information
   </header>
 
-  <input
-    type="text"
-    id="search"
-    placeholder="Search by flight number (e.g., VY123)..."
-  />
+  <div class="filters">
+    <input type="text" id="search" placeholder="Search by flight number (e.g., VY123)..." />
+    <select id="destinationFilter">
+      <option value="">All Destinations</option>
+    </select>
+    <select id="airlineFilter">
+      <option value="">All Airlines</option>
+    </select>
+  </div>
 
   <div id="flights">Loading flight data...</div>
 
@@ -113,19 +111,61 @@
         const div = document.createElement('div');
         div.className = 'flight';
         div.innerHTML = `
-          <h2>Flight ${flight.number}</h2>
-          <p><strong>Date:</strong> ${flight.date}</p>
+          <h2>${flight.flight_number}</h2>
+          <p><strong>Airline:</strong> ${flight.airline}</p>
+          <p><strong>Destination:</strong> ${flight.destination}</p>
+          <p><strong>Departure:</strong> ${flight.departure_time}</p>
+          <p><strong>Terminal:</strong> ${flight.terminal}</p>
           <p><strong>Gate:</strong> ${flight.gate}</p>
-          <p><strong>Arrival Time:</strong> ${flight.arrival}</p>
+          <p><strong>Status:</strong> ${flight.flight_status}</p>
         `;
         container.appendChild(div);
       });
     }
 
-    fetch('prova.json')
+    function updateFilters() {
+      const search = document.getElementById('search').value.trim().toLowerCase();
+      const destination = document.getElementById('destinationFilter').value;
+      const airline = document.getElementById('airlineFilter').value;
+
+      const filtered = allFlights.filter(flight => {
+        const matchesFlightNumber = flight.flight_number.toLowerCase().includes(search);
+        const matchesDestination = destination === '' || flight.destination === destination;
+        const matchesAirline = airline === '' || flight.airline === airline;
+        return matchesFlightNumber && matchesDestination && matchesAirline;
+      });
+
+      displayFlights(filtered);
+    }
+
+    function populateSelectOptions(flights, key, selectId) {
+      const select = document.getElementById(selectId);
+      const options = [...new Set(flights.map(f => f[key]).filter(Boolean))].sort();
+      options.forEach(opt => {
+        const option = document.createElement('option');
+        option.value = opt;
+        option.textContent = opt;
+        select.appendChild(option);
+      });
+    }
+
+    fetch('full_flight_data.json')
       .then(response => response.json())
-      .then(flightData => {
-        allFlights = flightData.sort((a, b) => a.arrival.localeCompare(b.arrival));
+      .then(rawData => {
+        // Convertimos las claves a minúsculas con guiones bajos
+        const flightData = rawData.map(f => ({
+          flight_number: f["Flight Number"],
+          airline: f["Airline"],
+          destination: f["Destination"],
+          departure_time: f["Departure Time"],
+          terminal: f["Terminal"],
+          gate: f["Gate"],
+          flight_status: f["Flight Status"]
+        }));
+
+        allFlights = flightData.sort((a, b) => a.departure_time.localeCompare(b.departure_time));
+        populateSelectOptions(allFlights, 'destination', 'destinationFilter');
+        populateSelectOptions(allFlights, 'airline', 'airlineFilter');
         displayFlights(allFlights);
       })
       .catch(error => {
@@ -133,13 +173,10 @@
         console.error('Failed to load JSON:', error);
       });
 
-    document.getElementById('search').addEventListener('input', function () {
-      const searchTerm = this.value.trim().toLowerCase();
-      const filtered = allFlights.filter(flight =>
-        flight.number.toLowerCase().includes(searchTerm)
-      );
-      displayFlights(filtered);
-    });
+    document.getElementById('search').addEventListener('input', updateFilters);
+    document.getElementById('destinationFilter').addEventListener('change', updateFilters);
+    document.getElementById('airlineFilter').addEventListener('change', updateFilters);
   </script>
 </body>
 </html>
+
