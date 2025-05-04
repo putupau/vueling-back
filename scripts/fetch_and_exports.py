@@ -1,8 +1,6 @@
 from __future__ import annotations
 import argparse, json, sys, base64, datetime, pathlib, os
-from modules.api.fetcher   import (
-    fetch_flight, fetch_next_departures, fetch_next_arrivals, fetch_realtime_position
-)
+from modules.api.fetcher import fetch_flight, fetch_next_departures, fetch_next_arrivals, fetch_realtime_position
 from modules.api.formatter import format_single_flight, format_flights_list, format_realtime
 
 
@@ -36,12 +34,14 @@ def build_cli() -> argparse.ArgumentParser:
 
     # single flight ---------------------------------------------------------- #
     f = sub.add_parser("flight", help="single flight by IATA code")
-    f.add_argument("flight_iata", "flight_date")
+    f.add_argument("flight_iata")
+    f.add_argument("flight_date")
 
     # departures / arrivals -------------------------------------------------- #
     for kind in ("departures", "arrivals"):
         g = sub.add_parser(kind, help=f"next {kind} for airport")
-        g.add_argument("airport_iata", "flight_date")
+        g.add_argument("airport_iata")
+        g.add_argument("flight_date")
         g.add_argument("--limit", type=int, default=5)
 
     # realtime --------------------------------------------------------------- #
