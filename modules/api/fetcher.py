@@ -11,12 +11,14 @@ load_dotenv()
 # --------------------------------------------------------------------------- #
 # Configuration
 # --------------------------------------------------------------------------- #
-BASE_URL      = os.getenv("BASE_URL", "https://api.aviationstack.com/v1") # Default to aviationstack API
-API_KEY       = os.getenv("AVIATIONSTACK_API_KEY")
-AIRLINE_IATA  = os.getenv("AIRLINE_IATA", "VY")  # Vueling by default
-DEFAULT_LIMIT = int(os.getenv("DEFAULT_LIMIT", 5)) # Default limit for API calls
-CACHE_TTL     = int(os.getenv("CACHE_TTL", 60))  # Seconds to cache the results
+BASE_URL = os.getenv("BASE_URL", "https://api.aviationstack.com/v1")
+API_KEY = os.getenv("AVIATIONSTACK_API_KEY")
+AIRLINE_IATA = os.getenv("AIRLINE_IATA", "VY")
+DEFAULT_LIMIT = os.getenv("DEFAULT_LIMIT",5)
+CACHE_TTL = os.getenv("CACHE_TTL", "60")
 
+DEFAULT_LIMIT = int(DEFAULT_LIMIT)
+CACHE_TTL = int(CACHE_TTL)
 
 if not API_KEY:
     raise RuntimeError("AVIATIONSTACK_API_KEY is missing in your environment")
@@ -70,19 +72,13 @@ def _fetch(endpoint: str, params: Dict[str, Any]) -> Dict[str, Any]:
 # --------------------------------------------------------------------------- #
 # Public helpers
 # --------------------------------------------------------------------------- #
-def fetch_next_departures(airport_iata: str, flight_date: str,
-                          limit: int = DEFAULT_LIMIT) -> Dict[str, Any]:
-    return _fetch(
-        "flights",
-        {
-            "departure_airport_iata": airport_iata,
-            # free plan: cannot filter by date, only real-time active flights
-            # "flight_date": flight_date,
-            "airline_iata": AIRLINE_IATA, 
-            "limit": limit,
-            "flight_status": "active"
-        },
-    )
+def fetch_next_departures(airport_iata: str, flight_date: str, limit: int = DEFAULT_LIMIT):
+    return _fetch("flights", {
+        "departure_airport_iata": airport_iata,
+        # "airline_iata": AIRLINE_IATA,
+        # "flight_status": "active",
+        "limit": limit,
+    })
 
 
 def fetch_flight(flight_iata: str, flight_date: str) -> Dict[str, Any]:
