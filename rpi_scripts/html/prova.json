@@ -1,0 +1,62 @@
+[
+  {
+    "number": "AA123",
+    "date": "2025-05-03",
+    "gate": "Gate 7",
+    "arrival": "14:35"
+  },
+  {
+    "number": "LA456",
+    "date": "2025-05-03",
+    "gate": "Gate 12",
+    "arrival": "15:10"
+  },
+  {
+    "number": "IB789",
+    "date": "2025-05-03",
+    "gate": "Gate 4",
+    "arrival": "16:00"
+  },
+  {
+    "number": "AF234",
+    "date": "2025-05-03",
+    "gate": "Gate 5",
+    "arrival": "14:50"
+  },
+  {
+    "number": "UA567",
+    "date": "2025-05-03",
+    "gate": "Gate 3",
+    "arrival": "15:30"
+  },
+  {
+    "number": "BA890",
+    "date": "2025-05-03",
+    "gate": "Gate 9",
+    "arrival": "16:15"
+  },
+  {
+    "number": "DL123",
+    "date": "2025-05-03",
+    "gate": "Gate 6",
+    "arrival": "17:00"
+  },
+  {
+    "number": "AF543",
+    "date": "2025-05-03",
+    "gate": "Gate 8",
+    "arrival": "17:30"
+  },
+  {
+    "number": "LH432",
+    "date": "2025-05-03",
+    "gate": "Gate 11",
+    "arrival": "13:45"
+  },
+  {
+    "number": "EK876",
+    "date": "2025-05-03",
+    "gate": "Gate 10",
+    "arrival": "18:00"
+  }
+]
