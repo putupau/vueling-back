@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Información de Vuelos Vueling</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        padding: 20px;
+        background: #f0f0f0;
+      }
+      h1 {
+        text-align: center;
+      }
+      #search {
+        max-width: 600px;
+        margin: 20px auto;
+        display: block;
+        width: 100%;
+        padding: 10px;
+        font-size: 1em;
+        border: 1px solid #ccc;
+        border-radius: 6px;
+      }
+      #flights {
+        max-width: 600px;
+        margin: auto;
+      }
+      .flight {
+        background: #fff;
+        border: 1px solid #ccc;
+        border-left: 5px solid #007bff;
+        padding: 15px;
+        margin-bottom: 12px;
+        border-radius: 6px;
+        box-shadow: 1px 1px 4px rgba(0, 0, 0, 0.05);
+      }
+      .flight h2 {
+        margin: 0 0 8px;
+        font-size: 1.2em;
+        color: #007bff;
+      }
+      .flight p {
+        margin: 4px 0;
+        font-size: 0.95em;
+      }
+      .small {
+        font-size: 0.8em;
+        color: #666;
+      }
+      @media (max-width: 600px) {
+        .flight {
+          font-size: 0.9em;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Upcoming Vueling Flights</h1>
+
+    <input
+      type="text"
+      id="search"
+      placeholder="Search by flight number (e.g. VY3953)..."
+    />
+
+    <div id="flights">Loading flights...</div>
+
+    <script>
+      let allFlights = [];
+
+      function formatTime(iso) {
+        if (!iso) return "—";
+        const d = new Date(iso);
+        return d.toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" });
+      }
+
+      function displayFlights(flights) {
+        const container = document.getElementById("flights");
+        container.innerHTML = "";
+
+        if (flights.length === 0) {
+          container.innerHTML = "<p>No flights found.</p>";
+          return;
+        }
+
+        flights.forEach((f) => {
+          const div = document.createElement("div");
+          div.className = "flight";
+          div.innerHTML = `
+            <h2>${f.flight_number} — ${f.status.toUpperCase()}</h2>
+            <p><strong>Origin:</strong> ${f.origin.iata} (${f.origin.name})</p>
+            <p><strong>Destination:</strong> ${f.destination.iata} (${
+            f.destination.name
+          })</p>
+            <p><strong>Exit:</strong> ${formatTime(f.departure_time)}  
+               <small>(T${f.terminal.departure} · Gate ${
+            f.gate.departure || "—"
+          })</small>
+            </p>
+            <p><strong>Llegada:</strong> ${formatTime(f.arrival_time)}  
+               <small>(T${f.terminal.arrival || "—"} · Gate ${
+            f.gate.arrival || "—"
+          })</small>
+            </p>
+            <p><strong>Delay:</strong> ${
+              f.delay.departure != null ? f.delay.departure + " min" : "—"
+            }</p>
+            <p><strong>Luggage:</strong> ${f.baggage.arrival || "—"}</p>
+            <p class="small">Last updated: ${new Date(
+              f.last_updated
+            ).toLocaleTimeString()}</p>
+          `;
+          container.appendChild(div);
+        });
+      }
+
+      fetch("./out/departures.json")
+        .then((res) => res.json())
+        .then((data) => {
+          allFlights = data.sort((a, b) =>
+            a.departure_time.localeCompare(b.departure_time)
+          );
+          displayFlights(allFlights);
+        })
+        .catch((err) => {
+          document.getElementById("flights").textContent =
+            "Error loading flight data.";
+          console.error(err);
+        });
+
+      document.getElementById("search").addEventListener("input", (e) => {
+        const term = e.target.value.trim().toLowerCase();
+        const filtered = allFlights.filter((f) =>
+          f.flight_number.toLowerCase().includes(term)
+        );
+        displayFlights(filtered);
+      });
+    </script>
+  </body>
+</html>
